@@ -6,7 +6,7 @@
 package com.hannonhill.smt;
 
 /**
- * Object containing necessary information about page or block for logging purposes
+ * Object containing necessary information about block for logging purposes
  * 
  * @author Artur Tomusiak
  * @since 1.0

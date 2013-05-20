@@ -12,7 +12,7 @@
 			<h4><s:actionerror /></h4>
 			<s:form action="AssignContentType" method="POST">
 			    <s:select list="contentTypes" name="selectedContentType" label="Cascade Content Type"/>
-			    <s:textfield name="pageExtensions" label="Page extensions"/>
+			    <s:textfield name="dataDefinitionBlockExtensions" label="Data Definition Block extensions"/>
 			    <s:textfield name="blockExtensions" label="XHTML Block extensions"/>
 				<tr>
 					<td><button onclick="window.location='<s:property value="previousLink"/>';return false;">Previous</button></td>

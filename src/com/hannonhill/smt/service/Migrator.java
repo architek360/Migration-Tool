@@ -24,13 +24,12 @@ public class Migrator
 {
 
     /**
-     * Re-edits each page to align the links to make them tracked by Cascade Server
+     * Re-edits each data definition block to align the links to make them tracked by Cascade Server
      */
     public static void alignLinks(ProjectInformation projectInformation)
     {
         MigrationStatus migrationStatus = projectInformation.getMigrationStatus();
         List<CascadeAssetInformation> blocks = migrationStatus.getCreatedBlocks();
-        List<CascadeAssetInformation> pages = migrationStatus.getCreatedPages();
 
         for (CascadeAssetInformation block : blocks)
         {
@@ -40,34 +39,7 @@ public class Migrator
             try
             {
                 Log.add("Aligning links in block " + PathUtil.generateBlockLink(block, projectInformation.getUrl()) + "... ", migrationStatus);
-                WebServices.realignXhtmlBlockLinks(block.getId(), projectInformation);
-                migrationStatus.incrementProgress(1);
-                migrationStatus.incrementAssetsAligned();
-                Log.add("<span style=\"color: green;\">success.</span><br/>", migrationStatus);
-            }
-            catch (Exception e)
-            {
-                // Sometimes the exception message is null, so we get the message from the parent exception
-                String message = e.getMessage();
-                if (message == null && e.getCause() != null)
-                    message = e.getCause().getMessage();
-
-                migrationStatus.incrementProgress(1);
-                migrationStatus.incrementAssetsNotAligned();
-                Log.add("<span style=\"color: red;\">Error: " + message + "</span><br/>", migrationStatus);
-                e.printStackTrace();
-            }
-        }
-
-        for (CascadeAssetInformation page : pages)
-        {
-            if (migrationStatus.isShouldStop())
-                return;
-
-            try
-            {
-                Log.add("Aligning links in page " + PathUtil.generatePageLink(page, projectInformation.getUrl()) + "... ", migrationStatus);
-                WebServices.realignLinks(page.getId(), projectInformation);
+                WebServices.realignLinks(block.getId(), projectInformation);
                 migrationStatus.incrementProgress(1);
                 migrationStatus.incrementAssetsAligned();
                 Log.add("<span style=\"color: green;\">success.</span><br/>", migrationStatus);
@@ -88,9 +60,9 @@ public class Migrator
     }
 
     /**
-     * Creates files in Cascade that do not end with {@link XmlAnalyzer#FILE_TO_PAGE_EXTENSIONS} or
-     * {@link XmlAnalyzer#FILE_TO_BLOCK_EXTENSIONS} extension and are not hidden (do not start with "."). Uses
-     * {@link ProjectInformation#getFilesToProcess()} to get the actual files.
+     * Creates files in Cascade that do not end with extensions specified in the configuration and are not
+     * hidden (do not start with "."). Uses {@link ProjectInformation#getFilesToProcess()} to get the actual
+     * files.
      * 
      * @param files
      * @param projectInformation
@@ -110,7 +82,8 @@ public class Migrator
                 continue;
 
             String extension = PathUtil.getExtension(name);
-            if (projectInformation.getPageExtensions().contains(extension) || projectInformation.getBlockExtensions().contains(extension))
+            if (projectInformation.getDataDefinitionBlockExtensions().contains(extension)
+                    || projectInformation.getBlockExtensions().contains(extension))
                 continue;
 
             createFile(folderFile, projectInformation, metadataSetId);
@@ -212,11 +185,11 @@ public class Migrator
     }
 
     /**
-     * Creates pages based on the information provided in {@link ProjectInformation}
+     * Creates data definition blocks based on the information provided in {@link ProjectInformation}
      * 
      * @param projectInformation
      */
-    public static void createPages(ProjectInformation projectInformation)
+    public static void createDataDefinitionBlocks(ProjectInformation projectInformation)
     {
         Set<File> filesToProcess = projectInformation.getFilesToProcess();
         MigrationStatus migrationStatus = projectInformation.getMigrationStatus();
@@ -273,7 +246,7 @@ public class Migrator
             String name = file.getName();
             String extension = PathUtil.getExtension(name);
 
-            if (!projectInformation.getPageExtensions().contains(extension))
+            if (!projectInformation.getDataDefinitionBlockExtensions().contains(extension))
                 continue;
 
             try
@@ -285,17 +258,17 @@ public class Migrator
                 if (!XmlAnalyzer.allCharactersLegal(relativePath))
                     relativePath = XmlAnalyzer.removeIllegalCharacters(relativePath);
 
-                Log.add("Creating a page from file " + relativePath + "... ", migrationStatus);
+                Log.add("Creating a data definition block from file " + relativePath + "... ", migrationStatus);
 
-                CascadeAssetInformation cascadePage = WebServices.createPage(file, projectInformation);
+                CascadeAssetInformation cascadeBlock = WebServices.createDataDefinitionBlock(file, projectInformation);
 
-                Log.add(PathUtil.generatePageLink(cascadePage, projectInformation.getUrl()), migrationStatus);
+                Log.add(PathUtil.generateBlockLink(cascadeBlock, projectInformation.getUrl()), migrationStatus);
 
                 migrationStatus.incrementProgress(1);
-                migrationStatus.addCreatedPage(cascadePage);
+                migrationStatus.addCreatedBlock(cascadeBlock);
 
-                // Add the page to the list because links will need to be realigned.
-                if (cascadePage.isAlreadyExisted())
+                // Add the block to the list because links will need to be realigned.
+                if (cascadeBlock.isAlreadyExisted())
                 {
                     migrationStatus.incrementAssetsSkipped();
                     Log.add("<span style=\"color: blue;\">already existed.</span><br/>", migrationStatus);

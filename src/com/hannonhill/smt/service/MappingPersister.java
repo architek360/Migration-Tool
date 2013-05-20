@@ -45,7 +45,7 @@ public class MappingPersister
     private static final String FOLDER_TAG = "folder";
     private static final String CROSS_SITE_TAG = "crossSite";
     private static final String EXTERNAL_LINK_TAG = "externalLink";
-    private static final String PAGE_EXTENSIONS_TAG = "pageExtensions";
+    private static final String DATA_DEFINITION_BLOCK_EXTENSIONS_TAG = "dataDefinitionBlockExtensions";
     private static final String BLOCK_EXTENSIONS_TAG = "blockExtensions";
 
     /**
@@ -78,9 +78,9 @@ public class MappingPersister
             persistRootLevelFolder(content, projectInformation.getExternalRootLevelFolderAssignemnts().get(folder));
         content.append("</" + ROOT_LEVEL_FOLDERS_TAG + ">");
 
-        content.append("<" + PAGE_EXTENSIONS_TAG + ">");
-        content.append(projectInformation.getPageExtensionsString());
-        content.append("</" + PAGE_EXTENSIONS_TAG + ">");
+        content.append("<" + DATA_DEFINITION_BLOCK_EXTENSIONS_TAG + ">");
+        content.append(projectInformation.getDataDefinitionBlockExtensionsString());
+        content.append("</" + DATA_DEFINITION_BLOCK_EXTENSIONS_TAG + ">");
 
         content.append("<" + BLOCK_EXTENSIONS_TAG + ">");
         content.append(projectInformation.getBlockExtensionsString());
@@ -135,8 +135,8 @@ public class MappingPersister
                     loadFieldMappings(node, projectInformation.getFieldMapping(), contentType);
                 else if (node.getNodeName().equals(STATIC_VALUE_MAPPINGS_TAG))
                     loadStaticValueMappings(node, projectInformation.getStaticValueMapping(), contentType);
-                else if (node.getNodeName().equals(PAGE_EXTENSIONS_TAG))
-                    projectInformation.setPageExtensions(node.getTextContent());
+                else if (node.getNodeName().equals(DATA_DEFINITION_BLOCK_EXTENSIONS_TAG))
+                    projectInformation.setDataDefinitionBlockExtensions(node.getTextContent());
                 else if (node.getNodeName().equals(BLOCK_EXTENSIONS_TAG))
                     projectInformation.setBlockExtensions(node.getTextContent());
             }

@@ -25,7 +25,6 @@ public class MigrationStatus extends TaskStatus
     private int assetsAligned;
     private int assetsNotAligned;
 
-    private final List<CascadeAssetInformation> createdPages; // a list of ids and paths of created pages
     private final List<CascadeAssetInformation> createdBlocks; // a list of ids of created blocks
 
     private final Set<String> createdAssetPaths; // to quickly check for duplicates
@@ -44,7 +43,6 @@ public class MigrationStatus extends TaskStatus
         assetsAligned = 0;
         assetsNotAligned = 0;
 
-        createdPages = new ArrayList<CascadeAssetInformation>();
         createdBlocks = new ArrayList<CascadeAssetInformation>();
 
         createdAssetPaths = new HashSet<String>();
@@ -59,7 +57,7 @@ public class MigrationStatus extends TaskStatus
     }
 
     /**
-     * Increments the number of pages created by 1
+     * Increments the number of assets created by 1
      */
     public void incrementAssetsCreated()
     {
@@ -67,7 +65,7 @@ public class MigrationStatus extends TaskStatus
     }
 
     /**
-     * @return Returns the pagesSkipped.
+     * @return Returns the assetsSkipped.
      */
     public int getAssetsSkipped()
     {
@@ -75,7 +73,7 @@ public class MigrationStatus extends TaskStatus
     }
 
     /**
-     * Increments the number of pages skipped by 1
+     * Increments the number of assets skipped by 1
      */
     public void incrementAssetsSkipped()
     {
@@ -128,25 +126,6 @@ public class MigrationStatus extends TaskStatus
     public void incrementAssetsNotAligned()
     {
         assetsNotAligned++;
-    }
-
-    /**
-     * @return Returns the createdPages.
-     */
-    public List<CascadeAssetInformation> getCreatedPages()
-    {
-        return createdPages;
-    }
-
-    /**
-     * Adds the created page to the list and its path to the set
-     * 
-     * @param page
-     */
-    public void addCreatedPage(CascadeAssetInformation page)
-    {
-        createdPages.add(page);
-        createdAssetPaths.add(page.getPath().toLowerCase());
     }
 
     /**

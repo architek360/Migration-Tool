@@ -81,7 +81,7 @@ public class MigrationAction extends BaseAction
                 LinkCheckingStatus linkCheckingStatus = projectInformation.getLinkCheckingStatus();
                 object = createJSONObject(linkCheckingStatus, currentTask);
 
-                int totalProgress = migrationStatus.getCreatedPages().size() + migrationStatus.getCreatedBlocks().size();
+                int totalProgress = migrationStatus.getCreatedBlocks().size();
                 object.put("progress", 1000.0 * linkCheckingStatus.getProgress() / totalProgress);
                 object.put("checked", linkCheckingStatus.getAssetsChecked());
                 object.put("withErrors", linkCheckingStatus.getAssetsWithErrors());

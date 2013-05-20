@@ -28,7 +28,7 @@ public class AssignContentTypeAction extends BaseAction
     private String selectedContentType; // the Cascade Content Type path selected by the user after the form
                                         // submission
 
-    private String pageExtensions;
+    private String dataDefinitionBlockExtensions;
     private String blockExtensions;
 
     @Override
@@ -58,15 +58,13 @@ public class AssignContentTypeAction extends BaseAction
 
         projectInformation.setContentTypePath(selectedContentType);
 
-        if (pageExtensions == null || pageExtensions.trim().equals(""))
+        if (dataDefinitionBlockExtensions == null || dataDefinitionBlockExtensions.trim().equals(""))
         {
-            addActionError("You must at least one page extension");
+            addActionError("You must at least one data definition block extension");
             return processView();
         }
 
-        projectInformation.getPageExtensions().clear();
-        projectInformation.setPageExtensions(pageExtensions);
-        projectInformation.getBlockExtensions().clear();
+        projectInformation.setDataDefinitionBlockExtensions(dataDefinitionBlockExtensions);
         projectInformation.setBlockExtensions(blockExtensions);
 
         try
@@ -96,7 +94,7 @@ public class AssignContentTypeAction extends BaseAction
         selectedContentType = projectInformation.getContentTypePath();
         Collections.sort(contentTypes);
 
-        pageExtensions = projectInformation.getPageExtensionsString();
+        dataDefinitionBlockExtensions = projectInformation.getDataDefinitionBlockExtensionsString();
         blockExtensions = projectInformation.getBlockExtensionsString();
         return INPUT;
     }
@@ -134,19 +132,19 @@ public class AssignContentTypeAction extends BaseAction
     }
 
     /**
-     * @return Returns the pageExtensions.
+     * @return Returns the dataDefinitionBlockExtensions.
      */
-    public String getPageExtensions()
+    public String getDataDefinitionBlockExtensions()
     {
-        return pageExtensions;
+        return dataDefinitionBlockExtensions;
     }
 
     /**
-     * @param pageExtensions the pageExtensions to set
+     * @param dataDefinitionBlockExtensions the dataDefinitionBlockExtensions to set
      */
-    public void setPageExtensions(String pageExtensions)
+    public void setDataDefinitionBlockExtensions(String dataDefinitionBlockExtensions)
     {
-        this.pageExtensions = pageExtensions;
+        this.dataDefinitionBlockExtensions = dataDefinitionBlockExtensions;
     }
 
     /**

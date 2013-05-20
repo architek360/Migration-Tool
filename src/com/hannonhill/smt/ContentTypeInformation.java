@@ -26,6 +26,9 @@ public class ContentTypeInformation
                                                                          // field "path" to actual field
     private final boolean usesDataDefinition;
 
+    private final String dataDefinitionId;
+    private final String metadataSetId;
+
     /**
      * Constructor. Reads the necessary information of given content type (Metadata Set, Data Definition)
      * through web services and
@@ -51,6 +54,9 @@ public class ContentTypeInformation
             this.dataDefinitionFields = returnMap;
             usesDataDefinition = false;
         }
+
+        this.dataDefinitionId = contentType.getDataDefinitionId();
+        this.metadataSetId = contentType.getMetadataSetId();
     }
 
     /**
@@ -75,5 +81,21 @@ public class ContentTypeInformation
     public boolean isUsesDataDefinition()
     {
         return usesDataDefinition;
+    }
+
+    /**
+     * @return Returns the dataDefinitionId.
+     */
+    public String getDataDefinitionId()
+    {
+        return dataDefinitionId;
+    }
+
+    /**
+     * @return Returns the metadataSetId.
+     */
+    public String getMetadataSetId()
+    {
+        return metadataSetId;
     }
 }

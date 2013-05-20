@@ -118,7 +118,7 @@ public class PathUtil
         for (; oldPartsIndex < oldParts.length; oldPartsIndex++)
             newPath.append("/" + oldParts[oldPartsIndex]);
 
-        return newPath.toString();
+        return "/" + removeLeadingSlashes(newPath.toString());
     }
 
     /**
@@ -232,19 +232,6 @@ public class PathUtil
     }
 
     /**
-     * Generates a link to the page in Cascade Server
-     * 
-     * @param cascadePage
-     * @param cascadeUrl
-     * @return
-     */
-    public static String generatePageLink(CascadeAssetInformation cascadePage, String cascadeUrl)
-    {
-        return "<a href=\"" + PathUtil.getURLWithoutAssetOperationPart(cascadeUrl) + "/entity/open.act?id=" + cascadePage.getId()
-                + "&amp;type=page\" target=\"_blank\">/" + cascadePage.getPath() + "</a> ";
-    }
-
-    /**
      * Generates a link to the file in Cascade Server
      * 
      * @param cascadeFile
@@ -308,7 +295,7 @@ public class PathUtil
      * @param projectInformation
      * @return
      */
-    public static String createPagePathFromFileSystemFile(File file, ProjectInformation projectInformation)
+    public static String createPathFromFileSystemFile(File file, ProjectInformation projectInformation)
     {
         return PathUtil.truncateExtension(PathUtil.getRelativePath(file, projectInformation.getXmlDirectory()));
     }

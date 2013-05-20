@@ -28,11 +28,11 @@ import com.hannonhill.smt.service.XmlAnalyzer;
 import com.hannonhill.www.ws.ns.AssetOperationService.DynamicMetadataField;
 import com.hannonhill.www.ws.ns.AssetOperationService.FieldValue;
 import com.hannonhill.www.ws.ns.AssetOperationService.Metadata;
-import com.hannonhill.www.ws.ns.AssetOperationService.Page;
 import com.hannonhill.www.ws.ns.AssetOperationService.StructuredData;
 import com.hannonhill.www.ws.ns.AssetOperationService.StructuredDataAssetType;
 import com.hannonhill.www.ws.ns.AssetOperationService.StructuredDataNode;
 import com.hannonhill.www.ws.ns.AssetOperationService.StructuredDataType;
+import com.hannonhill.www.ws.ns.AssetOperationService.XhtmlDataDefinitionBlock;
 
 /**
  * Utility class with helper methods related to web services
@@ -43,45 +43,47 @@ import com.hannonhill.www.ws.ns.AssetOperationService.StructuredDataType;
 public class WebServicesUtil
 {
     /**
-     * Creates a Page object based on the information provided in the projectInformation and the actual file
-     * from which the Page needs to be created.
+     * Creates a Data Definition Block object based on the information provided in the projectInformation and
+     * the actual file from which the Block needs to be created.
      * 
-     * @param pageFile
+     * @param file
      * @param projectInformation
      * @return
      * @throws Exception
      */
-    public static Page setupPageObject(File pageFile, ProjectInformation projectInformation) throws Exception
+    public static XhtmlDataDefinitionBlock setupDataDefinitionBlockObject(File file, ProjectInformation projectInformation) throws Exception
     {
-        String path = PathUtil.truncateExtension(PathUtil.getRelativePath(pageFile, projectInformation.getXmlDirectory()));
+        String path = PathUtil.truncateExtension(PathUtil.getRelativePath(file, projectInformation.getXmlDirectory()));
         if (!XmlAnalyzer.allCharactersLegal(path))
             path = XmlAnalyzer.removeIllegalCharacters(path);
-        String pageName = PathUtil.truncateExtension(PathUtil.getNameFromPath(path));
+        String blockName = PathUtil.truncateExtension(PathUtil.getNameFromPath(path));
         String parentFolderPath = PathUtil.getParentFolderPathFromPath(path);
-        String pageFileContents = JTidy.tidyContentConditionallyFullHtml(FileSystem.getFileContents(pageFile));
-        if (parentFolderPath.equals(""))
-            parentFolderPath = "/";
+        String blockFileContents = JTidy.tidyContentConditionallyFullHtml(FileSystem.getFileContents(file));
 
         String contentTypePath = projectInformation.getContentTypePath();
         ContentTypeInformation contentType = projectInformation.getContentTypes().get(contentTypePath);
         Set<String> metadataFieldNames = contentType.getMetadataFields().keySet();
 
-        Page page = new Page();
-        page.setContentTypePath(contentTypePath);
-        page.setName(pageName);
-        page.setParentFolderPath(parentFolderPath);
-        page.setSiteName(projectInformation.getSiteName());
-        page.setMetadata(createPageMetadata(projectInformation, pageFileContents, metadataFieldNames, projectInformation.getMigrationStatus()));
+        XhtmlDataDefinitionBlock block = new XhtmlDataDefinitionBlock();
+        block.setMetadataSetId(contentType.getMetadataSetId());
+        block.setName(blockName);
+        block.setParentFolderPath(parentFolderPath);
+        block.setSiteName(projectInformation.getSiteName());
+        block.setMetadata(createBlockMetadata(projectInformation, blockFileContents, metadataFieldNames, projectInformation.getMigrationStatus()));
 
         // Create the structured data object with the tree of structured data nodes
-        StructuredData structuredData = createPageStructuredData(projectInformation, pageFileContents, parentFolderPath + "/" + pageName);
+        StructuredData structuredData = createBlockStructuredData(projectInformation, blockFileContents, parentFolderPath + "/" + blockName);
 
-        // If page uses data definition, assign it to the page object
+        // If block uses data definition, assign it to the block object
         if (contentType.isUsesDataDefinition())
-            page.setStructuredData(structuredData);
+        {
+            block.setStructuredData(structuredData);
+            block.getStructuredData().setDefinitionId(contentType.getDataDefinitionId());
+        }
         else
         {
-            // if page does not use data definition, the tree mapping should contain only a single xhtml field
+            // if block does not use data definition, the tree mapping should contain only a single xhtml
+            // field
             StructuredDataNode[] xhtmlNodes = structuredData.getStructuredDataNodes();
             String xhtml = null;
             if (xhtmlNodes.length == 1)
@@ -89,15 +91,15 @@ public class WebServicesUtil
             else if (xhtmlNodes.length == 0)
                 ; // do nothing, no mappings
             else
-                throw new Exception("The mappings for a page without Data Definition contains more than one field.");
-            page.setXhtml(xhtml == null ? "" : xhtml);
+                throw new Exception("The mappings for a block without Data Definition contains more than one field.");
+            block.setXhtml(xhtml == null ? "" : xhtml);
         }
 
-        return page;
+        return block;
     }
 
     /**
-     * Creates the page's structured data object with the values from the xmlPage uses the mappings from the
+     * Creates the block structured data object with the values from the xml block uses the mappings from the
      * assetType.
      * 
      * @param projectInformation
@@ -106,7 +108,7 @@ public class WebServicesUtil
      * @return
      * @throws Exception
      */
-    private static StructuredData createPageStructuredData(ProjectInformation projectInformation, String fileContents, String assetPath)
+    private static StructuredData createBlockStructuredData(ProjectInformation projectInformation, String fileContents, String assetPath)
             throws Exception
     {
         // Create the root group object to which all the information will be attached
@@ -138,7 +140,7 @@ public class WebServicesUtil
     }
 
     /**
-     * Creates the page's metadata object with the values from the xmlPage uses the mappings from the
+     * Creates the block metadata object with the values from the xml block uses the mappings from the
      * assetType.
      * 
      * @param projectInformation
@@ -148,7 +150,7 @@ public class WebServicesUtil
      * @return
      * @throws Exception
      */
-    private static Metadata createPageMetadata(ProjectInformation projectInformation, String fileContents, Set<String> availableMetadataFieldNames,
+    private static Metadata createBlockMetadata(ProjectInformation projectInformation, String fileContents, Set<String> availableMetadataFieldNames,
             TaskStatus taskStatus) throws Exception
     {
         // Create the metadata object and the list of dynamic fields

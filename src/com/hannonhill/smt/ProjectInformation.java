@@ -56,11 +56,9 @@ public class ProjectInformation
     private final Map<String, String> existingCascadeFiles; // Used for Luminis file import and link checking
     private final Map<String, String> existingCascadeXhtmlBlocks;// performance reasons - file paths are
                                                                  // checked first
-    // to avoid having to check if file exists each time a new
-    // file is brought in
-    private final Map<String, String> existingCascadePages; // Also used for link checking performance reasons
 
-    private final Set<String> pageExtensions; // Extensions of files that need to be converted to pages
+    private final Set<String> dataDefinitionBlockExtensions; // Extensions of files that need to be converted
+                                                             // to data definition blocks
     private final Set<String> blockExtensions; // Extensions of files that need to be converted to xhtml
                                                // blocks
 
@@ -89,8 +87,7 @@ public class ProjectInformation
         externalRootLevelFolderAssignemnts = new HashMap<String, ExternalRootLevelFolderAssignment>();
         existingCascadeFiles = new HashMap<String, String>();
         existingCascadeXhtmlBlocks = new HashMap<String, String>();
-        existingCascadePages = new HashMap<String, String>();
-        pageExtensions = new HashSet<String>();
+        dataDefinitionBlockExtensions = new HashSet<String>();
         blockExtensions = new HashSet<String>();
 
         setDefaultExtensions();
@@ -101,12 +98,12 @@ public class ProjectInformation
      */
     public void setDefaultExtensions()
     {
-        pageExtensions.clear();
-        pageExtensions.add(".html");
-        pageExtensions.add(".php");
-        pageExtensions.add(".jsp");
-        pageExtensions.add(".htm");
-        pageExtensions.add(".asp");
+        dataDefinitionBlockExtensions.clear();
+        dataDefinitionBlockExtensions.add(".html");
+        dataDefinitionBlockExtensions.add(".php");
+        dataDefinitionBlockExtensions.add(".jsp");
+        dataDefinitionBlockExtensions.add(".htm");
+        dataDefinitionBlockExtensions.add(".asp");
 
         blockExtensions.clear();
         blockExtensions.add(".inc");
@@ -347,14 +344,6 @@ public class ProjectInformation
     }
 
     /**
-     * @return Returns the existingCascadePages.
-     */
-    public Map<String, String> getExistingCascadePages()
-    {
-        return existingCascadePages;
-    }
-
-    /**
      * @return Returns the contentTypePath.
      */
     public String getContentTypePath()
@@ -387,30 +376,30 @@ public class ProjectInformation
     }
 
     /**
-     * @return Returns the pageExtensions.
+     * @return Returns the dataDefinitionBlockExtensions.
      */
-    public Set<String> getPageExtensions()
+    public Set<String> getDataDefinitionBlockExtensions()
     {
-        return pageExtensions;
+        return dataDefinitionBlockExtensions;
     }
 
     /**
-     * @return Returns a comma separated list of page extensions
+     * @return Returns a comma separated list of dataDefinitionBlockExtensions
      */
-    public String getPageExtensionsString()
+    public String getDataDefinitionBlockExtensionsString()
     {
-        return convertSetToExtensions(pageExtensions);
+        return convertSetToExtensions(dataDefinitionBlockExtensions);
     }
 
     /**
-     * Sets the page extensions from a comma separated list
+     * Sets the dataDefinitionBlockExtensions from a comma separated list
      * 
      * @param extensions
      */
-    public void setPageExtensions(String extensions)
+    public void setDataDefinitionBlockExtensions(String extensions)
     {
-        pageExtensions.clear();
-        pageExtensions.addAll(convertExtensionsToSet(extensions));
+        dataDefinitionBlockExtensions.clear();
+        dataDefinitionBlockExtensions.addAll(convertExtensionsToSet(extensions));
     }
 
     /**

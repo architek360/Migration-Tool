@@ -221,7 +221,7 @@ public class LinkRewriter
 
         String withoutExtension = PathUtil.truncateExtension(withoutAnchor);
         String pathOnly = PathUtil.removeLeadingSlashes(withoutExtension);
-        if (projectInformation.getExistingCascadePages().keySet().contains(pathOnly.toLowerCase()))
+        if (projectInformation.getExistingCascadeXhtmlBlocks().keySet().contains(pathOnly.toLowerCase()))
             attribute.setNodeValue(withoutExtension + anchor);
     }
 
@@ -277,7 +277,7 @@ public class LinkRewriter
     {
         String newPath = PathUtil.convertRelativeToAbsolute(link, pagePath);
         String extension = PathUtil.getExtension(newPath);
-        if (projectInformation.getPageExtensions().contains(extension) || projectInformation.getBlockExtensions().contains(extension))
+        if (projectInformation.getDataDefinitionBlockExtensions().contains(extension) || projectInformation.getBlockExtensions().contains(extension))
             newPath = PathUtil.truncateExtension(newPath);
 
         int deployPathLevels = pagePath.split("/").length - 1;

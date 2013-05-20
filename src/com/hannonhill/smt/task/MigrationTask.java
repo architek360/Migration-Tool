@@ -43,7 +43,7 @@ public class MigrationTask extends Thread
         projectInformation.setMigrationStatus(migrationStatus);
         projectInformation.setCurrentTask(TASK_NAME);
 
-        Migrator.createPages(projectInformation);
+        Migrator.createDataDefinitionBlocks(projectInformation);
         Migrator.alignLinks(projectInformation);
         if (migrationStatus.isShouldStop())
             Log.add("<br/>Migration stopped by the user.<br/>", migrationStatus);
