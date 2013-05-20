@@ -48,15 +48,20 @@ public class XmlAnalyzer
     private static final String SERENA_CONTENT_FIELDS_XPATH = "/asset/content/field";
     private static final String LUMINIS_METADATA_FIELD_NAMES_REGEX = "<sct:meta name=\"([^\"]*)\"";
     private static final String LUMINIS_CONTENT_FIELD_NAMES_REGEX = "<sct:(field|xhtml|img|ckeditor|eoprong|component) name=\"([^\"]*)\"";
+    private static final String LUMINIS_VAR_FIELD_NAMES_REGEX = "<sct:var name=\"([^\"]*)\"";
     private static final String LUMINIS_WEBVIEW_URL_XPATH = "/root/@webviewurl";
     private static final String LUMINIS_SCT_WEB_PAGE_XPATH = "/root/sct_web_page";
+    private static final String LUMINIS_VAR_DOCUMENT_XPATH = "/root/document";
     private static final String FILE_PROBLEM_MESSAGE = "There were problems with analyzing file ";
     private static final String LINK_XPATH = "//a/@href | //img/@src | //script/@src | //link/@href ";
     private static final String DEPLOY_PATH_XPATH = "/asset/coreData/deployPath";
     private static final String FIELDS_XPATH = "//field";
     private static final String ROOT_SITE_FOLDER_NAME = "Root Site";
     private static final String LINK_FILE_NAME = "linkFile.xml";
+    private static final String VAR_FILE_NAME = "VarAndMetaTagValues.xml";
     private static final String LINKED_ITEM_TAG_NAME = "linked_item";
+    private static final String VAR_LIST_NAME = "var-list";
+    private static final String META_LIST_NAME = "meta-list";
 
     /**
      * Analyzes a folder by going through each file in the folder and subfolders and calling appropriate
@@ -384,6 +389,9 @@ public class XmlAnalyzer
             // <sct:meta/>
             assetType.getMetadataFields().addAll(findLuminisMetadataFields(jspFile));
 
+            // <sct:var/>
+            assetType.getVarFields().addAll(findLuminisVarFields(jspFile));
+
             // <sct:field/>, <sct:img/> and <sct:xhtml/>
             assetType.getContentFields().addAll(findLuminisContentFields(jspFile));
         }
@@ -413,6 +421,19 @@ public class XmlAnalyzer
     {
         String jsp = FileSystem.getFileContents(jspFile);
         return convertSpacesToUnderscores(getRegexMatches(jsp, LUMINIS_METADATA_FIELD_NAMES_REGEX, 1));
+    }
+
+    /**
+     * Returns all &lt;var/&gt; fields in the given <code>jspFile</code> and returns a list of their
+     * names (name attributes)
+     * 
+     * @param jspFile
+     * @return
+     */
+    private static List<String> findLuminisVarFields(File jspFile) throws Exception
+    {
+        String jsp = FileSystem.getFileContents(jspFile);
+        return convertSpacesToUnderscores(getRegexMatches(jsp, LUMINIS_VAR_FIELD_NAMES_REGEX, 1));
     }
 
     /**
@@ -482,6 +503,8 @@ public class XmlAnalyzer
         {
             if (xmlFile.getName().equals(LINK_FILE_NAME))
                 analyzeLuminisLinkfile(xmlFile, projectInformation, errorMessages);
+            else if (xmlFile.getName().equals(VAR_FILE_NAME))
+                analyzeLuminisVarFile(xmlFile, projectInformation);
         }
         catch (Exception e)
         {
@@ -531,6 +554,110 @@ public class XmlAnalyzer
     }
 
     /**
+     * Analyzes the contents of VarAndMetaTagValues.xml provided as <code>varFile</code>.
+     * 
+     * @param varFile
+     * @param projectInformation
+     * @throws Exception
+     */
+    private static void analyzeLuminisVarFile(File varFile, ProjectInformation projectInformation) throws Exception
+    {
+        XPath xpath = XPathFactory.newInstance().newXPath();
+
+        String contents = FileSystem.getFileContents(varFile);
+
+        // Convert & to &amp; as Luminis seems to be generating invalid XML
+        contents = contents.replaceAll("&", "&amp;");
+        ByteArrayInputStream in = new ByteArrayInputStream(contents.getBytes());
+        InputSource is = new InputSource();
+        is.setByteStream(in);
+
+        xpath = XPathFactory.newInstance().newXPath();
+
+        NodeList varDocumentNodes = (NodeList) xpath.evaluate(LUMINIS_VAR_DOCUMENT_XPATH, is, XPathConstants.NODESET);
+
+        for (int i = 0; i < varDocumentNodes.getLength(); i++)
+            analyzeLuminisVarDocument(varDocumentNodes.item(i), varFile, projectInformation);
+    }
+
+    /**
+     * Analyzes the contents of &lt;document&gt; tag and figures out the Luminis page's name, var field
+     * values and meta field values.
+     * 
+     * @param documentNode
+     * @param varFile
+     * @param projectInformation
+     * @throws Exception
+     */
+    private static void analyzeLuminisVarDocument(Node documentNode, File varFile, ProjectInformation projectInformation) throws Exception
+    {
+
+        Node objectNameNode = documentNode.getAttributes().getNamedItem("name");
+        if (objectNameNode == null)
+            throw new Exception("The <document> tag has no \"name\" tag.");
+
+        String xmlFileName = objectNameNode.getTextContent();
+        if (!xmlFileName.endsWith(".xml"))
+            xmlFileName += ".xml";
+        String xmlFilePath = varFile.getParent() + "/" + xmlFileName;
+        File xmlFile = new File(xmlFilePath);
+
+        DetailedXmlPageInformation sctWebPage = projectInformation.getPagesToProcess().get(xmlFile);
+        if (sctWebPage == null)
+        {
+            sctWebPage = new DetailedXmlPageInformation();
+            projectInformation.getPagesToProcess().put(xmlFile, sctWebPage);
+            projectInformation.getFilesToProcess().add(xmlFile);
+        }
+
+        NodeList childNodes = documentNode.getChildNodes();
+        for (int i = 0; i < childNodes.getLength(); i++)
+        {
+            String nodeName = childNodes.item(i).getNodeName();
+            if (nodeName.equals(VAR_LIST_NAME))
+                analyzeVarList(childNodes.item(i), sctWebPage);
+            else if (nodeName.equals(META_LIST_NAME))
+                analyzeMetaList(childNodes.item(i), sctWebPage);
+        }
+    }
+
+    /**
+     * Analyzes the contents of &lt;var-list&gt; tag and adds the mappings to the page
+     * 
+     * @param varListNode
+     * @param sctWebPage
+     */
+    private static void analyzeVarList(Node varListNode, DetailedXmlPageInformation sctWebPage)
+    {
+        NodeList childNodes = varListNode.getChildNodes();
+        for (int i = 0; i < childNodes.getLength(); i++)
+        {
+            Node childNode = childNodes.item(i);
+            String varName = childNode.getNodeName();
+            String varValue = childNode.getTextContent();
+            sctWebPage.getVarMap().put(varName, varValue);
+        }
+    }
+
+    /**
+     * Analyzes the contents of &lt;meta-list&gt; tag and adds the mapings to the page
+     * 
+     * @param metaListNode
+     * @param sctWebPage
+     */
+    private static void analyzeMetaList(Node metaListNode, DetailedXmlPageInformation sctWebPage)
+    {
+        NodeList childNodes = metaListNode.getChildNodes();
+        for (int i = 0; i < childNodes.getLength(); i++)
+        {
+            Node childNode = childNodes.item(i);
+            String metadataName = childNode.getNodeName();
+            String metadataValue = childNode.getTextContent();
+            sctWebPage.getMetadataMap().put(metadataName, metadataValue);
+        }
+    }
+
+    /**
      * Analyzes the contents of &lt;sct_web_page&gt; tag: figures out the Luminis page's name, template used.
      * Stores the page as {@link File} object to be included in migration. Analyzes links provided as
      * &lt;linked_item&gt;s by calling {@link #analyzeLuminisLinkedItem(Node, DetailedXmlPageInformation)} on
@@ -549,11 +676,23 @@ public class XmlAnalyzer
             analyzeLuminisSctWebPage(Node sctWebPageNode, File linkFile, ProjectInformation projectInformation, List<String> errorMessages)
                     throws Exception
     {
-        DetailedXmlPageInformation sctWebPage = new DetailedXmlPageInformation();
-
         Node objectNameNode = sctWebPageNode.getAttributes().getNamedItem("object_name");
         if (objectNameNode == null)
             throw new Exception("The <sct_web_page> tag has no \"object_name\" tag.");
+
+        String xmlFileName = objectNameNode.getTextContent();
+        if (!xmlFileName.endsWith(".xml"))
+            xmlFileName += ".xml";
+        String xmlFilePath = linkFile.getParent() + "/" + xmlFileName;
+        File xmlFile = new File(xmlFilePath);
+
+        DetailedXmlPageInformation sctWebPage = projectInformation.getPagesToProcess().get(xmlFile);
+        if (sctWebPage == null)
+        {
+            sctWebPage = new DetailedXmlPageInformation();
+            projectInformation.getPagesToProcess().put(xmlFile, sctWebPage);
+            projectInformation.getFilesToProcess().add(xmlFile);
+        }
 
         Node templateUsedNode = sctWebPageNode.getAttributes().getNamedItem("template_used");
         if (templateUsedNode == null)
@@ -577,15 +716,6 @@ public class XmlAnalyzer
         for (int i = 0; i < childNodes.getLength(); i++)
             if (childNodes.item(i).getNodeName().equals(LINKED_ITEM_TAG_NAME))
                 analyzeLuminisLinkedItem(childNodes.item(i), sctWebPage);
-
-        String xmlFileName = objectNameNode.getTextContent();
-        if (!xmlFileName.endsWith(".xml"))
-            xmlFileName += ".xml";
-        String xmlFilePath = linkFile.getParent() + "/" + xmlFileName;
-        File xmlFile = new File(xmlFilePath);
-
-        projectInformation.getPagesToProcess().put(xmlFile, sctWebPage);
-        projectInformation.getFilesToProcess().add(xmlFile);
     }
 
     /**

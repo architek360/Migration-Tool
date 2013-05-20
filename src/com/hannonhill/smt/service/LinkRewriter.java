@@ -69,6 +69,7 @@ public class LinkRewriter
     {
         rewriteLuminisLinks(page.getContentMap(), page, projectInformation);
         rewriteLuminisLinks(page.getMetadataMap(), page, projectInformation);
+        rewriteLuminisLinks(page.getVarMap(), page, projectInformation);
     }
 
     /**
