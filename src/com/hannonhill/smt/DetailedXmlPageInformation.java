@@ -22,6 +22,7 @@ public class DetailedXmlPageInformation
     private String deployPath;
     private String assetType;
     private final Map<String, String> metadataMap = new HashMap<String, String>();
+    private final Map<String, String> varMap = new HashMap<String, String>();
     private final Map<String, String> contentMap = new HashMap<String, String>();
     private final Set<LuminisLink> luminisLinks = new HashSet<LuminisLink>();
 
@@ -63,6 +64,14 @@ public class DetailedXmlPageInformation
     public Map<String, String> getMetadataMap()
     {
         return metadataMap;
+    }
+
+    /**
+     * @return Returns the varMap.
+     */
+    public Map<String, String> getVarMap()
+    {
+        return varMap;
     }
 
     /**

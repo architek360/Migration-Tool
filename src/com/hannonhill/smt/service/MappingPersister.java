@@ -36,6 +36,7 @@ public class MappingPersister
     private static final String NAME_TAG = "name";
     private static final String MAPPED_CONTENT_TYPE_PATH_TAG = "mappedContentTypePath";
     private static final String METADATA_FIELD_MAPPINGS_TAG = "metadataFieldMappings";
+    private static final String VAR_FIELD_MAPPINGS_TAG = "varFieldMappings";
     private static final String CONTENT_FIELD_MAPPINGS_TAG = "contentFieldMappings";
     private static final String FIELD_MAPPING_TAG = "fieldMapping";
     private static final String FIELD_NAME_TAG = "fieldName";
@@ -188,6 +189,7 @@ public class MappingPersister
         String assetTypeName = null;
         String mappedContentTypePath = null;
         Node metadataFieldMappingsNode = null;
+        Node varFieldMappingsNode = null;
         Node contentFieldMappingsNode = null;
         Node staticValueMappingsNode = null;
         for (int i = 0; i < assetTypeNode.getChildNodes().getLength(); i++)
@@ -200,6 +202,8 @@ public class MappingPersister
                 mappedContentTypePath = node.getTextContent();
             else if (nodeName.equals(METADATA_FIELD_MAPPINGS_TAG))
                 metadataFieldMappingsNode = node;
+            else if (nodeName.equals(VAR_FIELD_MAPPINGS_TAG))
+                varFieldMappingsNode = node;
             else if (nodeName.equals(CONTENT_FIELD_MAPPINGS_TAG))
                 contentFieldMappingsNode = node;
             else if (nodeName.equals(STATIC_VALUE_MAPPINGS_TAG))
@@ -226,11 +230,13 @@ public class MappingPersister
 
         // clear existing mappings
         assetType.getMetadataFieldMapping().clear();
+        assetType.getVarFieldMapping().clear();
         assetType.getContentFieldMapping().clear();
         assetType.getStaticValueMapping().clear();
 
         // load new mappings
         loadFieldMappings(metadataFieldMappingsNode, assetType.getMetadataFieldMapping(), contentType);
+        loadFieldMappings(varFieldMappingsNode, assetType.getVarFieldMapping(), contentType);
         loadFieldMappings(contentFieldMappingsNode, assetType.getContentFieldMapping(), contentType);
         loadStaticValueMappings(staticValueMappingsNode, assetType.getStaticValueMapping(), contentType);
     }
@@ -389,6 +395,11 @@ public class MappingPersister
         for (String metadataFieldName : assetType.getMetadataFieldMapping().keySet())
             persistFieldMapping(content, assetType.getMetadataFieldMapping(), metadataFieldName);
         content.append("</" + METADATA_FIELD_MAPPINGS_TAG + ">");
+
+        content.append("<" + VAR_FIELD_MAPPINGS_TAG + ">");
+        for (String varFieldName : assetType.getVarFieldMapping().keySet())
+            persistFieldMapping(content, assetType.getVarFieldMapping(), varFieldName);
+        content.append("</" + VAR_FIELD_MAPPINGS_TAG + ">");
 
         content.append("<" + CONTENT_FIELD_MAPPINGS_TAG + ">");
         for (String contentFieldName : assetType.getContentFieldMapping().keySet())

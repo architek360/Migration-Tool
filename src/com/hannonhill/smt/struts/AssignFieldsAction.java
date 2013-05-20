@@ -33,6 +33,8 @@ public class AssignFieldsAction extends BaseAction
     // These are the available xml and Cascade fields
     private final List<String> xmlMetadataFieldNames = new ArrayList<String>(); // a list of available XML
                                                                                 // Metadata field names
+    private final List<String> xmlVarFieldNames = new ArrayList<String>(); // a list of available XML Var
+                                                                           // field names
     private final List<String> xmlContentFieldNames = new ArrayList<String>(); // a list of available XML
                                                                                // Content field names
     private final List<Field> cascadeMetadataFields = new ArrayList<Field>(); // a list of available Cascade
@@ -45,6 +47,7 @@ public class AssignFieldsAction extends BaseAction
     // These are the hidden fields that are generated automatically by javascript. For each assignment, all 5
     // arrays have one element added.
     private String[] selectedXmlMetadataFields = new String[0];
+    private String[] selectedXmlVarFields = new String[0];
     private String[] selectedXmlContentFields = new String[0];
     private String[] staticValues = new String[0];
     private String[] selectedCascadeMetadataFields = new String[0];
@@ -71,6 +74,7 @@ public class AssignFieldsAction extends BaseAction
 
         // Clear out the old information
         assetTypeObject.getMetadataFieldMapping().clear();
+        assetTypeObject.getVarFieldMapping().clear();
         assetTypeObject.getContentFieldMapping().clear();
         assetTypeObject.getStaticValueMapping().clear();
 
@@ -111,8 +115,10 @@ public class AssignFieldsAction extends BaseAction
         contentTypePath = projectInformation.getContentTypeMap().get(assetTypeName);
 
         xmlMetadataFieldNames.addAll(projectInformation.getAssetTypes().get(assetTypeName).getMetadataFields());
+        xmlVarFieldNames.addAll(projectInformation.getAssetTypes().get(assetTypeName).getVarFields());
         xmlContentFieldNames.addAll(projectInformation.getAssetTypes().get(assetTypeName).getContentFields());
         Collections.sort(xmlMetadataFieldNames);
+        Collections.sort(xmlVarFieldNames);
         Collections.sort(xmlContentFieldNames);
 
         ContentTypeInformation contentType = projectInformation.getContentTypes().get(contentTypePath);
@@ -139,6 +145,7 @@ public class AssignFieldsAction extends BaseAction
     private void addFieldMapping(int i, ContentTypeInformation contentType, AssetType assetTypeObject) throws Exception
     {
         String xmlMetadataFieldIdentifier = selectedXmlMetadataFields[i];
+        String xmlVarFieldIdentifier = selectedXmlVarFields[i];
         String xmlContentFieldIdentifier = selectedXmlContentFields[i];
         String staticValue = staticValues[i];
         String cascadeMetadataFieldIdentifier = selectedCascadeMetadataFields[i];
@@ -149,6 +156,7 @@ public class AssignFieldsAction extends BaseAction
         boolean isDataDefinition = cascadeMetadataFieldIdentifier.equals("null");
         boolean isContent = !xmlContentFieldIdentifier.equals("null");
         boolean isMetadata = !xmlMetadataFieldIdentifier.equals("null");
+        boolean isVar = !xmlVarFieldIdentifier.equals("null");
         String cascadeFieldIdentifier = isDataDefinition ? cascadeDataDefinitionFieldIdentifier : cascadeMetadataFieldIdentifier;
 
         // Get the actual field from the content type
@@ -163,6 +171,8 @@ public class AssignFieldsAction extends BaseAction
             assetTypeObject.getContentFieldMapping().put(xmlContentFieldIdentifier, field);
         else if (isMetadata)
             assetTypeObject.getMetadataFieldMapping().put(xmlMetadataFieldIdentifier, field);
+        else if (isVar)
+            assetTypeObject.getVarFieldMapping().put(xmlVarFieldIdentifier, field);
         else
             assetTypeObject.getStaticValueMapping().put(field, staticValue);
     }
@@ -232,6 +242,22 @@ public class AssignFieldsAction extends BaseAction
     }
 
     /**
+     * @return Returns the selectedXmlVarFields.
+     */
+    public String[] getSelectedXmlVarFields()
+    {
+        return selectedXmlVarFields;
+    }
+
+    /**
+     * @param selectedXmlVarFields the selectedXmlVarFields to set
+     */
+    public void setSelectedXmlVarFields(String[] selectedXmlVarFields)
+    {
+        this.selectedXmlVarFields = selectedXmlVarFields;
+    }
+
+    /**
      * @return Returns the selectedCascadeMetadataFields.
      */
     public String[] getSelectedCascadeMetadataFields()
@@ -253,6 +279,14 @@ public class AssignFieldsAction extends BaseAction
     public List<String> getXmlMetadataFieldNames()
     {
         return xmlMetadataFieldNames;
+    }
+
+    /**
+     * @return Returns the xmlVarFieldNames.
+     */
+    public List<String> getXmlVarFieldNames()
+    {
+        return xmlVarFieldNames;
     }
 
     /**
@@ -317,6 +351,14 @@ public class AssignFieldsAction extends BaseAction
     public Map<String, Field> getMetadataFieldMap()
     {
         return getCurrentAssetType().getMetadataFieldMapping();
+    }
+
+    /**
+     * @return Returns the varFieldMap.
+     */
+    public Map<String, Field> getVarFieldMap()
+    {
+        return getCurrentAssetType().getVarFieldMapping();
     }
 
     /**

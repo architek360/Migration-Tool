@@ -116,6 +116,7 @@ public class AssignContentTypesAction extends BaseAction
             if (!projectInformation.getAssetTypeNames().contains(assetType.getName()))
             {
                 assetType.getMetadataFieldMapping().clear();
+                assetType.getVarFieldMapping().clear();
                 assetType.getContentFieldMapping().clear();
             }
     }

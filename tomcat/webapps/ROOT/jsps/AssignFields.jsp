@@ -64,7 +64,7 @@
 				var xmlFieldNameFull = xmlFieldNamesEl.options[xmlFieldSelectedIndex].value;
 				var xmlFieldName = xmlFieldNamesEl.options[xmlFieldSelectedIndex].text;
 				var xmlFieldTypeLetter = xmlFieldNameFull.charAt(0);
-				var xmlFieldType = xmlFieldTypeLetter == 'm' ? "metadata" : xmlFieldTypeLetter == 'c' ? "content" : "static";
+				var xmlFieldType = xmlFieldTypeLetter == 'm' ? "metadata" : xmlFieldTypeLetter == 'v' ? "var" : xmlFieldTypeLetter == 'c' ? "content" : "static";
 				
 				var cascadeFieldNamesEl = document.getElementById("cascadeFieldNames");
 				var cascadeFieldName = cascadeFieldNamesEl.options[cascadeFieldSelectedIndex].text;
@@ -86,6 +86,7 @@
 				cell4.appendChild(document.createTextNode(cascadeFieldType));
 				var cell5 = document.createElement("td");
 				var hiddenContent = "<input type=\"hidden\" name=\"selectedXmlMetadataFields\" value=\""+(xmlFieldTypeLetter=="m"?xmlFieldName:"null")+"\"/>";
+				hiddenContent += "<input type=\"hidden\" name=\"selectedXmlVarFields\" value=\""+(xmlFieldTypeLetter=="v"?xmlFieldName:"null")+"\"/>";
 				hiddenContent += "<input type=\"hidden\" name=\"selectedXmlContentFields\" value=\""+(xmlFieldTypeLetter=="c"?xmlFieldName:"null")+"\"/>";
 				hiddenContent += "<input type=\"hidden\" name=\"staticValues\" value=\""+staticValueEscaped+"\"/>";				
 				hiddenContent += "<input type=\"hidden\" name=\"selectedCascadeMetadataFields\" value=\""+(cascadeFieldTypeLetter=="m" ? cascadeFieldIdentifier : "null")+"\"/>";				
@@ -171,6 +172,11 @@
 													<option value="m<s:property/>"><s:property/></option>
 												</s:iterator>
 											</optgroup>
+											<optgroup label="-Var-">
+												<s:iterator value="xmlVarFieldNames">												
+													<option value="v<s:property/>"><s:property/></option>
+												</s:iterator>
+											</optgroup>
 											<optgroup label="-Content-">
 												<s:iterator value="xmlContentFieldNames">												
 													<option value="c<s:property/>"><s:property/></option>
@@ -229,6 +235,9 @@
 		<script type="text/javascript">
 		<s:iterator value="metadataFieldMap.entrySet()">
 			addMappingByName("m<s:property value="key"/>", null, "<s:property value="value.identifier"/>", "<s:property value="value.class.name"/>");
+		</s:iterator>
+		<s:iterator value="varFieldMap.entrySet()">
+			addMappingByName("v<s:property value="key"/>", null, "<s:property value="value.identifier"/>", "<s:property value="value.class.name"/>");
 		</s:iterator>
 		<s:iterator value="contentFieldMap.entrySet()">
 			addMappingByName("c<s:property value="key"/>", null, "<s:property value="value.identifier"/>", "<s:property value="value.class.name"/>");

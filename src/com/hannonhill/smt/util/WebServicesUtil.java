@@ -124,6 +124,19 @@ public class WebServicesUtil
                 assignAppropriateFieldValue(rootGroup, (DataDefinitionField) field, fieldValue, projectInformation);
         }
 
+        // For each xml var field, find a mapping and assign appropriate value in structured data
+        for (String xmlVarFieldName : xmlPage.getVarMap().keySet())
+        {
+            Field field = assetType.getVarFieldMapping().get(xmlVarFieldName);
+
+            if (field == null)
+                continue;
+
+            String fieldValue = xmlPage.getVarMap().get(xmlVarFieldName);
+            if (field instanceof DataDefinitionField)
+                assignAppropriateFieldValue(rootGroup, (DataDefinitionField) field, fieldValue, projectInformation);
+        }
+
         // For each xml content field, find a mapping and assign appropriate value in structured data
         for (String xmlContentFieldName : xmlPage.getContentMap().keySet())
         {
@@ -186,6 +199,21 @@ public class WebServicesUtil
             if (field instanceof MetadataSetField)
             {
                 String fieldValue = trimMetadataFieldValue(field.getIdentifier(), xmlPage.getMetadataMap().get(xmlMetadataFieldName), taskStatus);
+                assignAppropriateFieldValue(metadata, dynamicFieldsList, (MetadataSetField) field, fieldValue);
+            }
+        }
+
+        // For each xml var field, find a mapping and assign appropriate value in metadata
+        for (String xmlVarFieldName : xmlPage.getVarMap().keySet())
+        {
+            Field field = assetType.getVarFieldMapping().get(xmlVarFieldName);
+
+            if (field == null)
+                continue;
+
+            if (field instanceof MetadataSetField)
+            {
+                String fieldValue = trimMetadataFieldValue(field.getIdentifier(), xmlPage.getVarMap().get(xmlVarFieldName), taskStatus);
                 assignAppropriateFieldValue(metadata, dynamicFieldsList, (MetadataSetField) field, fieldValue);
             }
         }
