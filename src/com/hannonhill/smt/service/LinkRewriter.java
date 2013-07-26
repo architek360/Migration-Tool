@@ -275,8 +275,11 @@ public class LinkRewriter
      */
     private static String rewriteLink(String link, String pagePath, ProjectInformation projectInformation)
     {
+        String extension = PathUtil.getExtension(pagePath);
+        if (".htm".equalsIgnoreCase(extension))
+            return PathUtil.truncateExtension(pagePath);
+
         String newPath = PathUtil.convertRelativeToAbsolute(link, pagePath);
-        String extension = PathUtil.getExtension(newPath);
         if (projectInformation.getDataDefinitionBlockExtensions().contains(extension) || projectInformation.getBlockExtensions().contains(extension))
             newPath = PathUtil.truncateExtension(newPath);
 
