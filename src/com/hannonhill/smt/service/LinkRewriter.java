@@ -277,7 +277,7 @@ public class LinkRewriter
     {
         String extension = PathUtil.getExtension(link);
         if (".htm".equalsIgnoreCase(extension))
-            return PathUtil.truncateExtension(link);
+            return link;
 
         String newPath = PathUtil.convertRelativeToAbsolute(link, pagePath);
         if (projectInformation.getDataDefinitionBlockExtensions().contains(extension) || projectInformation.getBlockExtensions().contains(extension))
