@@ -276,7 +276,11 @@ public class PathUtil
         if (path.startsWith("/"))
             path = path.substring(1);
 
-        return path.substring(path.indexOf('/'));
+        int indexOfSlash = path.indexOf('/');
+        if (indexOfSlash == -1)
+            return path;
+
+        return path.substring(indexOfSlash);
     }
 
     /**

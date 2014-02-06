@@ -785,7 +785,8 @@ public class XmlAnalyzer
             assetType.getContentFields().addAll(xmlPageInformation.getContentFields());
 
             // adds unique folder name only
-            projectInformation.getGatheredRootLevelFolders().add(xmlPageInformation.getRootLevelFolder());
+            if (xmlPageInformation.getRootLevelFolder() != null)
+                projectInformation.getGatheredRootLevelFolders().add(xmlPageInformation.getRootLevelFolder());
 
             // adds unique folder names only
             projectInformation.getGatheredLinkedRootLevelFolders().addAll(xmlPageInformation.getLinkedToRootLevelFolders());
@@ -914,16 +915,21 @@ public class XmlAnalyzer
     private static void findSerenaLinkedRootLevelFolders(File file, XmlPageInformation xmlPageInformation) throws Exception
     {
         String deployPath = getDeployPath(file).trim();
-        xmlPageInformation.setRootLevelFolder(deployPath.substring(0, deployPath.indexOf('/')));
-        int deployPathLevels = deployPath.split("/").length - 1;
+        int indexOfSlash = deployPath.indexOf('/');
+        if (indexOfSlash > -1)
+        {
+            xmlPageInformation.setRootLevelFolder(deployPath.substring(0, indexOfSlash));
 
-        XPath xpath = XPathFactory.newInstance().newXPath();
+            int deployPathLevels = deployPath.split("/").length - 1;
 
-        InputSource inputSource = new InputSource(new FileInputStream(file));
-        NodeList fieldNodes = (NodeList) xpath.evaluate(FIELDS_XPATH, inputSource, XPathConstants.NODESET);
+            XPath xpath = XPathFactory.newInstance().newXPath();
 
-        for (int i = 0; i < fieldNodes.getLength(); i++)
-            findLinkedRootLevelFolders(fieldNodes.item(i), deployPathLevels, xmlPageInformation);
+            InputSource inputSource = new InputSource(new FileInputStream(file));
+            NodeList fieldNodes = (NodeList) xpath.evaluate(FIELDS_XPATH, inputSource, XPathConstants.NODESET);
+
+            for (int i = 0; i < fieldNodes.getLength(); i++)
+                findLinkedRootLevelFolders(fieldNodes.item(i), deployPathLevels, xmlPageInformation);
+        }
     }
 
     /**
@@ -961,8 +967,12 @@ public class XmlAnalyzer
             if (linkLevels == deployPathLevels)
             {
                 String strippedLink = link.substring(link.lastIndexOf("../") + 3);
-                String rootLevelFolder = strippedLink.substring(0, strippedLink.indexOf('/'));
-                xmlPageInformation.getLinkedToRootLevelFolders().add(rootLevelFolder);
+                int indexOfSlash = strippedLink.indexOf('/');
+                if (indexOfSlash > -1)
+                {
+                    String rootLevelFolder = strippedLink.substring(0, indexOfSlash);
+                    xmlPageInformation.getLinkedToRootLevelFolders().add(rootLevelFolder);
+                }
             }
         }
     }

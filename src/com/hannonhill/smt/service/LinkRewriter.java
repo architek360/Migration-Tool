@@ -392,21 +392,27 @@ public class LinkRewriter
         {
             // check the root level folder and see if there is an assignment for it
             String withoutLeadingSlash = newPath.substring(1);
-            String rootLevelFolder = withoutLeadingSlash.substring(0, withoutLeadingSlash.indexOf('/'));
-            ExternalRootLevelFolderAssignment assignment = projectInformation.getExternalRootLevelFolderAssignemnts().get(rootLevelFolder);
-
-            // if no assignment, leave it as it is, if there is an assignment, rewrite the link
-            if (assignment != null)
+            int indexOfSlash = withoutLeadingSlash.indexOf('/');
+            if (indexOfSlash > -1)
             {
-                // if it is an external link, add the external url and return (skip adding extension)
-                if (assignment.getAssignmentType().equals(ExternalRootLevelFolderAssignment.ASSIGNMENT_TYPE_EXTERNAL_LINK))
-                    return assignment.getExternalLinkAssignment() + newPath; // converts link /folder/page to
-                                                                             // http://domain/com/folder/page
+                String rootLevelFolder = withoutLeadingSlash.substring(0, indexOfSlash);
+                ExternalRootLevelFolderAssignment assignment = projectInformation.getExternalRootLevelFolderAssignemnts().get(rootLevelFolder);
 
-                // if it is not an external link, do a cross site link and keep it for adding the extension
-                newPath = "site://" + assignment.getCrossSiteAssignment() + newPath; // converts link
-                                                                                     // /folder/page to
-                                                                                     // site://sitename/folder/page
+                // if no assignment, leave it as it is, if there is an assignment, rewrite the link
+                if (assignment != null)
+                {
+                    // if it is an external link, add the external url and return (skip adding extension)
+                    if (assignment.getAssignmentType().equals(ExternalRootLevelFolderAssignment.ASSIGNMENT_TYPE_EXTERNAL_LINK))
+                        return assignment.getExternalLinkAssignment() + newPath; // converts link /folder/page
+                                                                                 // to
+                                                                                 // http://domain/com/folder/page
+
+                    // if it is not an external link, do a cross site link and keep it for adding the
+                    // extension
+                    newPath = "site://" + assignment.getCrossSiteAssignment() + newPath; // converts link
+                                                                                         // /folder/page to
+                                                                                         // site://sitename/folder/page
+                }
             }
         }
 
